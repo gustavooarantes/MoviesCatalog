@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="movieApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Movies Catalog</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input, button { margin: 5px 0; padding: 5px; }
+        .movie { border-bottom: 1px solid #ccc; margin-bottom: 10px; padding-bottom: 10px; }
+    </style>
+</head>
+<body ng-controller="MovieController">
+
+<h1>Catálogo de Filmes</h1>
+
+<form ng-submit="addMovie()">
+    <input type="text" ng-model="newMovie.title" placeholder="Título" required />
+    <input type="text" ng-model="newMovie.director" placeholder="Diretor" required />
+    <input type="number" ng-model="newMovie.releaseYear" placeholder="Ano de Lançamento" required />
+    <input type="text" ng-model="newMovie.genre" placeholder="Gênero" required />
+    <button type="submit">Adicionar Filme</button>
+</form>
+
+<h2>Lista de Filmes</h2>
+<div ng-repeat="movie in movies" class="movie">
+    <strong>{{ movie.title }}</strong> ({{ movie.releaseYear }})<br>
+    Diretor: {{ movie.director }}<br>
+    Gênero: {{ movie.genre }}<br>
+    <button ng-click="deleteMovie(movie.id)">Remover</button>
+</div>
+
+<script>
+    const app = angular.module('movieApp', []);
+
+    app.controller('MovieController', function($scope, $http) {
+        const API_URL = '/movies';
+
+        $scope.movies = [];
+        $scope.newMovie = {};
+
+        const loadMovies = () => {
+            $http.get(API_URL).then(response => {
+                $scope.movies = response.data;
+            });
+        };
+
+        $scope.addMovie = () => {
+            $http.post(API_URL, $scope.newMovie).then(() => {
+                $scope.newMovie = {};
+                loadMovies();
+            });
+        };
+
+        $scope.deleteMovie = (id) => {
+            $http.delete(`${API_URL}/${id}`).then(() => {
+                loadMovies();
+            });
+        };
+
+        loadMovies();
+    });
+</script>
+</body>
+</html>
